@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>MULTI PRINT // STOCK TERMINAL</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <!-- Tom Select (Smart Dropdown) -->
+    <link href="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/css/tom-select.bootstrap5.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/js/tom-select.complete.min.js"></script>
+    <!-- QRCode JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    
+    <style>
+        :root {
+            --bg-dark: #041421;
+            --panel-bg: #082f49;
+            --text-light-blue: #7dd3fc;
+            --text-cyan: #22d3ee;
+            --text-white: #f0f9ff;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-light-blue);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            padding: 20px 0;
+        }
+
+        .container { max-width: 700px; margin-top: 2rem; }
+
+        .card-stock {
+            background-color: var(--panel-bg);
+            border: 1px solid #06b6d4;
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0px 8px 20px rgba(0, 0, 0, 0.6);
+        }
+
+        /* Custom Tom Select Dark Theme */
+        .ts-control, .ts-wrapper.single.input-active .ts-control {
+            background-color: #000000 !important;
+            border: 1px solid #0ea5e9 !important;
+            border-radius: 6px !important;
+            padding: 12px !important;
+        }
+        .ts-control > input { color: #00ff9d !important; font-size: 1.1rem; font-weight: bold; }
+        .ts-control .item { color: #00ff9d !important; font-size: 1.1rem; font-weight: bold; }
+        .ts-dropdown { background-color: #000000 !important; border: 1px solid #0ea5e9 !important; }
+        .ts-dropdown .option { padding: 10px; color: #00ff9d !important; font-size: 1rem; }
+        .ts-dropdown .active, .ts-dropdown .option:hover { background-color: #0891b2 !important; color: #ffffff !important; }
+
+        .btn-cyan { background-color: #0891b2; color: white; font-weight: bold; border: none; padding: 12px; font-size: 1.1rem; }
+        .btn-cyan:hover { background-color: #0e7490; color: white; }
+        .btn-green { background-color: #10b981; color: white; font-weight: bold; border: none; padding: 12px; font-size: 1.1rem; }
+        .btn-green:hover { background-color: #059669; color: white; }
+
+        /* ========================================================= */
+        /* CSS พิมพ์เอกสาร A4 แนวนอน (เหมือนระบบเดิม) */
+        /* ========================================================= */
+        #printArea { display: none; }
+
+        @media print {
+            body > *:not(#printArea) { display: none !important; }
+            body { background: white; padding: 0; margin: 0; }
+            #printArea { display: block !important; position: relative; }
+            #printArea * { visibility: visible; color: #000 !important; }
+            @page { size: A4 landscape; margin: 0; }
+        }
+
+        .print-sheet-container {
+            width: 297mm; height: 202mm; padding: 2mm 3mm; box-sizing: border-box;
+            background: white; display: flex; justify-content: space-between;
+            page-break-after: always; page-break-inside: avoid;
+            color: #000; font-family: Tahoma, sans-serif; overflow: hidden;
+        }
+
+        .print-card {
+            width: 48.6%; height: 100%; border: 1.5px solid #000;
+            padding: 2mm 2.5mm; box-sizing: border-box;
+            display: flex; flex-direction: column; justify-content: space-between; background: #fff;
+        }
+
+        .print-header-top { display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 2px solid #000; padding-bottom: 3px; margin-bottom: 3px; }
+        .print-title-area h3 { margin: 0 0 2px 0; font-size: 15px; text-align: center; font-weight: bold; }
+        .print-meta-row { font-size: 12px; margin-bottom: 4px; display: flex; align-items: flex-end; gap: 4px; font-weight: bold; }
+        .print-label { white-space: nowrap; margin-bottom: -1px; }
+        .print-value { border-bottom: 1.5px dotted #000; padding-left: 5px; min-height: 15px; white-space: nowrap; }
+
+        .print-qr-box { text-align: center; }
+        .print-qr-box canvas, .print-qr-box img { width: 58px !important; height: 58px !important; margin: 0 auto; }
+        .print-qr-box span { display: block; font-size: 9px; margin-top: 1px; font-weight: bold; }
+
+        .print-table { width: 100%; border-collapse: collapse; font-size: 11px; margin-top: 3px; table-layout: fixed; }
+        .print-table th, .print-table td { border: 1px solid #000; padding: 2px 3px; text-align: center; height: 18px; word-wrap: break-word; }
+        .print-table th { background-color: #e0e0e0 !important; font-size: 11px; font-weight: bold; -webkit-print-color-adjust: exact; }
+
+        .print-footer { display: flex; justify-content: space-between; font-size: 11px; margin-top: 2px; border-top: 1px solid #000; padding-top: 2px; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h3 class="text-center mb-4" style="color: var(--text-cyan); font-weight:bold;">🖨️ ระบบพิมพ์ใบความก้าวหน้า (พริ้นต์รวดเดียวทุกขั้นตอน)</h3>
+    
+    <div class="card card-stock">
+        <label class="form-label" style="font-weight:bold;">🔍 ค้นหาและเลือกเลขที่ใบสั่ง (Order No)</label>
+        <select id="select_order" class="form-select mb-4" placeholder="พิมพ์ค้นหาใบสั่งงาน..."></select>
+        
+        <div id="step_info" class="text-warning mb-3" style="font-size: 0.9rem; text-align: center; display: none;"></div>
+
+        <div class="row">
+            <div class="col-6">
+                <button class="btn btn-cyan w-100" onclick="printAllSteps(false)">🖨️ พิมพ์ฟอร์มเปล่า</button>
+            </div>
+            <div class="col-6">
+                <button class="btn btn-green w-100" onclick="printAllSteps(true)">🖨️ พิมพ์พร้อมประวัติ</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="printArea"></div>
+
+<script>
+    const BASE_URL = 'https://siiiifesdjuunwmwozfb.supabase.co/rest/v1';
+    const SUPABASE_KEY = 'sb_publishable_ohToE8Z_Fzo87uBtzdPDIg_cqHCi3HT';
+    const headers = { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}`, 'Content-Type': 'application/json' };
+
+    let globalData = { orders: [], works: [], targets: [], steps: [], employees: [], orderSteps: [] };
+    let orderSelectInstance;
+
+    window.onload = async function() {
+        Swal.fire({ title: 'กำลังโหลดข้อมูลฐานข้อมูล...', background: '#082f49', color: '#22d3ee', allowOutsideClick: false, didOpen: () => { Swal.showLoading() } });
+
+        try {
+            const [ordersRes, worksRes, targetsRes, stepsRes, empsRes, orderStepsRes] = await Promise.all([
+                fetch(`${BASE_URL}/orders?select=id_order,order_no,id_work,start_date,end_date,quantity`, { headers }).then(r => r.json()),
+                fetch(`${BASE_URL}/work_items?select=id_work,work_code`, { headers }).then(r => r.json()),
+                fetch(`${BASE_URL}/targets?select=id_target,id_work,id_step,target_amount`, { headers }).then(r => r.json()),
+                fetch(`${BASE_URL}/production_steps?select=id_step,step_name`, { headers }).then(r => r.json()),
+                fetch(`${BASE_URL}/employees?select=id_name,name`, { headers }).then(r => r.json()),
+                fetch(`${BASE_URL}/order_steps?select=id_order,id_step,start_date,end_date`, { headers }).then(r => r.json())
+            ]);
+
+            globalData.orders = ordersRes.sort((a, b) => String(a.order_no || '').localeCompare(String(b.order_no || ''), 'th', { numeric: true }));
+            globalData.works = worksRes;
+            globalData.targets = targetsRes.sort((a,b) => parseInt(a.id_step) - parseInt(b.id_step)); // เรียงตาม ID ขั้นตอน
+            globalData.steps = stepsRes;
+            globalData.employees = empsRes;
+            globalData.orderSteps = orderStepsRes;
+
+            const select = document.getElementById('select_order');
+            select.innerHTML = `<option value="">-- พิมพ์ค้นหาใบสั่งงาน --</option>`;
+            globalData.orders.forEach(o => {
+                select.innerHTML += `<option value="${o.id_order}">${o.order_no}</option>`;
+            });
+
+            orderSelectInstance = new TomSelect("#select_order", {
+                create: false,
+                sortField: false,
+                onChange: function(value) { showOrderInfo(value); }
+            });
+
+            Swal.close();
+        } catch (error) {
+            Swal.fire('Error', 'เชื่อมต่อฐานข้อมูลล้มเหลว', 'error');
+        }
+    };
+
+    function showOrderInfo(orderId) {
+        const infoDiv = document.getElementById('step_info');
+        if (!orderId) {
+            infoDiv.style.display = 'none';
+            return;
+        }
+        
+        const order = globalData.orders.find(o => String(o.id_order) === String(orderId));
+        if (order && order.id_work) {
+            const stepsCount = globalData.targets.filter(t => String(t.id_work) === String(order.id_work)).length;
+            infoDiv.innerHTML = `✅ ใบสั่งงานนี้มีชิ้นงาน และมีขั้นตอนทั้งหมด <b>${stepsCount}</b> ขั้นตอน (พร้อมสั่งพิมพ์)`;
+            infoDiv.style.display = 'block';
+        } else {
+            infoDiv.innerHTML = `❌ ใบสั่งงานนี้ยังไม่มีข้อมูลรหัสชิ้นงานในระบบ`;
+            infoDiv.style.display = 'block';
+        }
+    }
+
+    async function printAllSteps(withData) {
+        const orderId = document.getElementById('select_order').value;
+        if (!orderId) {
+            Swal.fire({icon: 'warning', title: 'แจ้งเตือน', text: 'กรุณาเลือกเลขที่ใบสั่งก่อนครับ', background: '#082f49', color: 'white'});
+            return;
+        }
+
+        const orderObj = globalData.orders.find(o => String(o.id_order) === String(orderId));
+        if (!orderObj || !orderObj.id_work) {
+            Swal.fire({icon: 'error', title: 'ผิดพลาด', text: 'ใบสั่งนี้ไม่มีข้อมูลรหัสชิ้นงาน ไม่สามารถหาขั้นตอนได้', background: '#082f49', color: 'white'});
+            return;
+        }
+
+        // หาขั้นตอน (Targets) ทั้งหมดของใบสั่งนี้
+        const targetsForOrder = globalData.targets.filter(t => String(t.id_work) === String(orderObj.id_work));
+        if (targetsForOrder.length === 0) {
+            Swal.fire({icon: 'warning', title: 'ไม่พบขั้นตอน', text: 'ไม่พบการตั้งค่าขั้นตอนทำงานสำหรับใบสั่งนี้', background: '#082f49', color: 'white'});
+            return;
+        }
+
+        Swal.fire({ title: 'กำลังเตรียมข้อมูลสำหรับพริ้นต์...', background: '#082f49', color: '#22d3ee', allowOutsideClick: false, didOpen: () => { Swal.showLoading() } });
+
+        // โหลดประวัติการผลิต (ถ้าเลือกพิมพ์พร้อมข้อมูล)
+        let historyData = [];
+        if (withData) {
+            try {
+                const res = await fetch(`${BASE_URL}/daily_production?id_order=eq.${orderId}&order=record_date.asc`, { headers });
+                if (res.ok) historyData = await res.json();
+            } catch (e) {
+                console.error("ดึงข้อมูลประวัติไม่สำเร็จ", e);
+            }
+        }
+
+        // เตรียมข้อมูลพื้นฐาน (รหัสชิ้นงาน, ยอดสั่งผลิต)
+        const workObj = globalData.works.find(w => String(w.id_work) === String(orderObj.id_work));
+        const workCodeText = workObj ? workObj.work_code : "-";
+        const orderNo = orderObj.order_no || '-';
+        const quantity = orderObj.quantity ? parseInt(orderObj.quantity).toLocaleString() + ' ชิ้น' : '-';
+        const baseUrl = 'https://paiboon-creater.github.io/Data_Information_Jaguar_productions/daily_production.html';
+
+        let allCardsHtml = [];
+
+        // ลูปสร้างหน้ากระดาษ (1 Card = 1 ขั้นตอน)
+        for (let target of targetsForOrder) {
+            // หาข้อมูล Step
+            const stepObj = globalData.steps.find(s => String(s.id_step) === String(target.id_step));
+            const stepNameText = stepObj ? stepObj.step_name : "-";
+            
+            // หาวันที่เริ่ม/เสร็จของขั้นตอนนี้ จากตาราง order_steps
+            let stepStartDateStr = "-";
+            let stepEndDateStr = "-";
+            const orderStepObj = globalData.orderSteps.find(os => String(os.id_order) === String(orderId) && String(os.id_step) === String(target.id_step));
+            if (orderStepObj) {
+                stepStartDateStr = formatDateStr(orderStepObj.start_date);
+                stepEndDateStr = formatDateStr(orderStepObj.end_date);
+            }
+
+            const currentUrl = `${baseUrl}?order_id=${encodeURIComponent(orderId)}&target_id=${encodeURIComponent(target.id_target)}`;
+
+            // สร้างแถวตารางข้อมูล 22 บรรทัด
+            let tableRowsHtml = '';
+            let runningTotal = 0;
+            const targetHistory = historyData.filter(h => String(h.id_target) === String(target.id_target));
+            
+            for(let i = 0; i < 22; i++) {
+                if (i < targetHistory.length) {
+                    const log = targetHistory[i];
+                    let d = new Date(log.record_date);
+                    let dateFormatted = !isNaN(d) ? `${d.getDate().toString().padStart(2, '0')}/${(d.getMonth()+1).toString().padStart(2, '0')}/${d.getFullYear().toString().slice(-2)}` : '';
+                    
+                    const emp = globalData.employees.find(e => String(e.id_name) === String(log.id_name));
+                    const empText = emp ? emp.name : '';
+                    const produced = log.produced_amount || 0;
+                    const ngAmt = log.nogoods_amount || 0;
+                    const hWork = log.hour_work ? log.hour_work.toFixed(2) : ''; 
+                    runningTotal += produced;
+
+                    tableRowsHtml += `<tr>
+                        <td>${dateFormatted}</td>
+                        <td></td>
+                        <td>${produced.toLocaleString()}</td>
+                        <td style="font-weight: bold;">${runningTotal.toLocaleString()}</td>
+                        <td>${ngAmt > 0 ? ngAmt.toLocaleString() : ''}</td>
+                        <td style="font-size: 10px;">${hWork}</td>
+                        <td style="text-align: left; padding-left: 4px; font-size: 10px;">${empText}</td>
+                        <td>${log.remark ? log.remark : ''}</td>
+                    </tr>`;
+                } else {
+                    tableRowsHtml += `<tr><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>`;
+                }
+            }
+
+            // นำโค้ด 1 ใบมารวมใน Array
+            allCardsHtml.push(`
+                <div class="print-card">
+                    <div class="print-header-top">
+                        <div style="flex-grow: 1; overflow: hidden;">
+                            <div class="print-title-area"><h3>ใบความก้าวหน้าของการผลิต</h3></div>
+                            <div class="print-meta-row">
+                                <span class="print-label">ใบสั่งงานเลขที่:</span> 
+                                <span class="print-value" style="flex: 1.4;">${orderNo}</span>
+                                <span class="print-label" style="margin-left: 12px;">ขั้นตอนงาน:</span> 
+                                <span class="print-value" style="flex: 1.2;">${stepNameText}</span>
+                            </div>
+                            <div class="print-meta-row">
+                                <span class="print-label">ชนิดงาน:</span> <span class="print-value" style="flex: 1;">${workCodeText}</span>
+                            </div>
+                            <div class="print-meta-row">
+                                <span class="print-label">จำนวนชิ้นงานสั่งผลิต:</span> <span class="print-value">${quantity}</span>
+                            </div>
+                            <div class="print-meta-row">
+                                <span class="print-label">วันที่เริ่ม:</span> <span class="print-value" style="flex: 1;">${stepStartDateStr}</span>
+                                <span class="print-label" style="margin-left: 10px;">วันที่เสร็จ:</span> <span class="print-value" style="flex: 1;">${stepEndDateStr}</span>
+                            </div>
+                        </div>
+                        <div class="print-qr-box">
+                            <div class="qrcode-target" data-url="${currentUrl}"></div>
+                            <span>สแกนเข้าสู่ขั้นตอน</span>
+                        </div>
+                    </div>
+                    <table class="print-table">
+                        <thead>
+                            <tr>
+                                <th width="10%">วันที่</th>
+                                <th width="14%" style="font-size: 9px;">ตัวเลขตอนเลิกงาน</th>
+                                <th width="14%">ผลิตได้/วัน</th>
+                                <th width="14%">สะสม</th>
+                                <th width="8%">เสีย</th>
+                                <th width="10%">ชั่วโมง</th>
+                                <th width="16%">ชื่อคนทำ</th>
+                                <th width="14%">หมายเหตุ</th>
+                            </tr>
+                        </thead>
+                        <tbody>${tableRowsHtml}</tbody>
+                    </table>
+                    <div class="print-footer">
+                        <span>F-PR-005-00</span>
+                        <span>DAILY PRODUCTION TRACKER</span>
+                    </div>
+                </div>
+            `);
+        }
+
+        // จัดกลุ่มหน้ากระดาษ (1 หน้า A4 มี 2 ใบ)
+        let finalPagesHtml = '';
+        for (let i = 0; i < allCardsHtml.length; i += 2) {
+            let leftCard = allCardsHtml[i];
+            let rightCard = allCardsHtml[i + 1] || `<div class="print-card" style="border:none;"></div>`; // ถ้าลงเศษคี่ ให้ขวาว่างเปล่า
+            
+            finalPagesHtml += `
+                <div class="print-sheet-container">
+                    ${leftCard}
+                    ${rightCard}
+                </div>
+            `;
+        }
+
+        // เอาไปใส่ใน div เพื่อเตรียมพริ้นต์
+        document.getElementById('printArea').innerHTML = finalPagesHtml;
+
+        // วนสร้าง QR Code ให้ครบทุกอันในหน้าพริ้นต์
+        document.querySelectorAll('.qrcode-target').forEach(el => {
+            el.innerHTML = "";
+            new QRCode(el, {
+                text: el.getAttribute('data-url'), width: 58, height: 58,
+                colorDark: "#000000", colorLight: "#ffffff", correctLevel: QRCode.CorrectLevel.M
+            });
+        });
+
+        Swal.close();
+
+        // สั่งเปิดหน้าต่าง Print ของเบราว์เซอร์
+        setTimeout(() => {
+            window.print();
+        }, 500);
+    }
+
+    function formatDateStr(dateInput) {
+        if (!dateInput) return '-';
+        let d = new Date(dateInput);
+        return !isNaN(d) ? `${d.getDate().toString().padStart(2, '0')}/${(d.getMonth()+1).toString().padStart(2, '0')}/${d.getFullYear()}` : dateInput;
+    }
+</script>
+</body>
+</html>
