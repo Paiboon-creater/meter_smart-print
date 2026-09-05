@@ -18,11 +18,11 @@
         @import url('https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap');
 
         :root {
-            --bg-kitty: #ffe4e6; /* พื้นหลังชมพูอ่อนมาก */
-            --panel-bg: #ffffff; /* การ์ดสีขาว */
-            --kitty-pink: #ff69b4; /* สีชมพูคิตตี้ (Hot Pink) */
-            --kitty-dark-pink: #d81b60; /* สีชมพูเข้มสำหรับตัวอักษร */
-            --text-main: #4a4a4a; /* สีเทาเข้มอ่านง่าย */
+            --bg-kitty: #ffe4e6; 
+            --panel-bg: #ffffff; 
+            --kitty-pink: #ff69b4; 
+            --kitty-dark-pink: #d81b60; 
+            --text-main: #4a4a4a; 
             --btn-pink: #ff69b4;
             --btn-pink-hover: #ff1493;
             --btn-mint: #2dd4bf;
@@ -54,7 +54,6 @@
             text-shadow: 1px 1px 2px rgba(255, 105, 180, 0.3);
         }
 
-        /* Custom Tom Select Kitty Theme (เน้นช่องกับตัวอักษรตัดกัน) */
         .ts-control, .ts-wrapper.single.input-active .ts-control {
             background-color: #ffffff !important;
             border: 2px solid var(--kitty-pink) !important;
@@ -62,12 +61,12 @@
             padding: 12px 15px !important;
         }
         .ts-control > input { 
-            color: #333333 !important; /* ตอนพิมพ์ค้นหา สีดำ/เทาเข้ม */
+            color: #333333 !important; 
             font-size: 1.1rem; 
             font-family: 'Kanit', sans-serif;
         }
         .ts-control .item { 
-            color: var(--kitty-dark-pink) !important; /* ตอนเลือกแล้วโชว์สีชมพูเข้ม */
+            color: var(--kitty-dark-pink) !important; 
             font-size: 1.1rem; 
             font-weight: 600; 
         }
@@ -88,13 +87,11 @@
             font-weight: bold; 
         }
 
-        /* ปุ่มสไตล์น่ารัก */
         .btn-cute-pink { background-color: var(--btn-pink); color: white; font-weight: 600; border: none; padding: 12px; font-size: 1.1rem; border-radius: 12px; box-shadow: 0 4px 6px rgba(255, 105, 180, 0.3); transition: all 0.2s;}
         .btn-cute-pink:hover { background-color: var(--btn-pink-hover); color: white; transform: translateY(-2px); }
         .btn-cute-mint { background-color: var(--btn-mint); color: white; font-weight: 600; border: none; padding: 12px; font-size: 1.1rem; border-radius: 12px; box-shadow: 0 4px 6px rgba(45, 212, 191, 0.3); transition: all 0.2s;}
         .btn-cute-mint:hover { background-color: var(--btn-mint-hover); color: white; transform: translateY(-2px); }
 
-        /* Custom Checkbox Container */
         #steps_checkbox_list {
             background-color: #fffafb;
             border: 2px dashed var(--kitty-pink);
@@ -111,7 +108,7 @@
         .btn-outline-cute:hover { background-color: var(--kitty-pink); color: white; }
 
         /* ========================================================= */
-        /* CSS พิมพ์เอกสาร A4 แนวนอน (กระดาษพริ้นต์ต้องเป็นขาวดำปกติ) */
+        /* CSS พิมพ์เอกสาร A4 แนวนอน */
         /* ========================================================= */
         #printArea { display: none; }
 
@@ -149,8 +146,13 @@
 
         .table-wrapper { flex-grow: 1; display: flex; flex-direction: column; }
         .print-table { width: 100%; height: 100%; border-collapse: collapse; font-size: 11px; table-layout: fixed; }
-        .print-table th, .print-table td { border: 1px solid #000; padding: 2px 3px; text-align: center; word-wrap: break-word; }
+        
+        /* ปรับ Padding ให้น้อยลงเพื่อเพิ่มพื้นที่ให้ตัวอักษร */
+        .print-table th, .print-table td { border: 1px solid #000; padding: 2px 2px; text-align: center; word-wrap: break-word; }
         .print-table th { background-color: #e0e0e0 !important; font-size: 11px; font-weight: bold; -webkit-print-color-adjust: exact; height: 20px; }
+        
+        /* สั่งให้คอลัมน์แรก (วันที่) ห้ามตัดคำเด็ดขาด */
+        .print-table td:first-child { white-space: nowrap; }
         
         .print-footer { display: flex; justify-content: space-between; font-size: 11px; margin-top: 5px; border-top: 1px solid #000; padding-top: 2px; font-weight: bold; }
     </style>
@@ -429,17 +431,18 @@
                     </div>
                     
                     <div class="table-wrapper">
+                        <!-- ปรับความกว้างคอลัมน์ใหม่ที่นี่ -->
                         <table class="print-table">
                             <thead>
                                 <tr>
-                                    <th width="10%">วันที่</th>
-                                    <th width="14%" style="font-size: 9px;">ตัวเลขตอนเลิกงาน</th>
-                                    <th width="14%">ผลิตได้/วัน</th>
+                                    <th width="12%">วันที่</th>
+                                    <th width="11%" style="font-size: 9px;">ตัวเลขตอนเลิกงาน</th>
+                                    <th width="13%">ผลิตได้/วัน</th>
                                     <th width="14%">สะสม</th>
                                     <th width="8%">เสีย</th>
-                                    <th width="10%">ชั่วโมง</th>
-                                    <th width="16%">ชื่อคนทำ</th>
-                                    <th width="14%">หมายเหตุ</th>
+                                    <th width="9%">ชั่วโมง</th>
+                                    <th width="18%">ชื่อคนทำ</th>
+                                    <th width="15%">หมายเหตุ</th>
                                 </tr>
                             </thead>
                             <tbody>${tableRowsHtml}</tbody>
