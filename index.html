@@ -4,14 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>MULTI PRINT // KITTY थीम</title>
-    <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- SweetAlert2 -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <!-- Tom Select (Smart Dropdown) -->
     <link href="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/css/tom-select.bootstrap5.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/js/tom-select.complete.min.js"></script>
-    <!-- QRCode JS -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     
     <style>
@@ -104,11 +100,23 @@
         .step-checkbox { width: 1.3rem; height: 1.3rem; cursor: pointer; accent-color: var(--kitty-pink); }
         .form-check-label { cursor: pointer; margin-left: 10px; font-size: 1.05rem; }
 
-        .btn-outline-cute { border: 2px solid var(--kitty-pink); color: var(--kitty-dark-pink); border-radius: 8px;}
+        .btn-outline-cute { border: 2px solid var(--kitty-pink); color: var(--kitty-dark-pink); border-radius: 8px; background-color: white;}
         .btn-outline-cute:hover { background-color: var(--kitty-pink); color: white; }
         
         .btn-clear { background-color: transparent; border: 1px solid #9ca3af; color: #6b7280; font-size: 0.85rem; border-radius: 6px; padding: 4px 10px; transition: 0.2s; }
         .btn-clear:hover { background-color: #f3f4f6; color: #374151; }
+
+        /* Modal Styles */
+        .modal-overlay {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(255, 182, 193, 0.85); z-index: 2000;
+            justify-content: center; align-items: center; flex-direction: column; padding: 20px; box-sizing: border-box;
+            backdrop-filter: blur(4px);
+        }
+        .manual-box {
+            width: 100%; max-width: 650px; max-height: 90vh;
+            overflow-y: auto; position: relative;
+        }
 
         /* ========================================================= */
         /* CSS พิมพ์เอกสาร A4 แนวนอน */
@@ -149,9 +157,8 @@
 
         .table-wrapper { flex-grow: 1; display: flex; flex-direction: column; }
         
-        /* การปรับแต่งตารางเพื่อล็อกความสูงแถวให้เท่ากันทุุกบรรทัด */
         .print-table { width: 100%; height: 100%; border-collapse: collapse; font-size: 10px; table-layout: fixed; }
-        .print-table tr { height: 4.34%; } /* บังคับความสูงเฉลี่ยให้เท่ากันหมด (100% / 23 แถว) */
+        .print-table tr { height: 4.34%; } 
         .print-table th, .print-table td { border: 1px solid #000; padding: 1px 2px; text-align: center; word-wrap: break-word; overflow: hidden; }
         .print-table th { background-color: #e0e0e0 !important; font-size: 10px; font-weight: bold; -webkit-print-color-adjust: exact; }
         .print-table td:first-child { white-space: nowrap; }
@@ -163,9 +170,11 @@
 
 <div class="container">
     
-    <!-- เพิ่มปุ่ม Home กลับหน้าหลักที่นี่ -->
-    <div class="text-end mb-2">
-        <a href="https://paiboon-creater.github.io/Data_Information_Jaguar_productions/" class="btn btn-outline-cute fw-bold px-3 text-decoration-none" style="background-color: white;">
+    <div class="d-flex justify-content-end gap-2 mb-2">
+        <button type="button" class="btn btn-outline-cute fw-bold px-3" onclick="openManual()">
+            📖 คู่มือการใช้งาน
+        </button>
+        <a href="https://paiboon-creater.github.io/Data_Information_Jaguar_productions/" class="btn btn-outline-cute fw-bold px-3 text-decoration-none">
             🏠 กลับหน้าหลัก
         </a>
     </div>
@@ -182,12 +191,10 @@
         
         <div id="step_info" class="mb-3" style="font-size: 1rem; font-weight: 600; color: var(--kitty-dark-pink); display: none;"></div>
 
-        <!-- โซนเลือกขั้นตอน -->
         <div id="steps_selection_container" class="mb-4" style="display: none;">
             <label class="form-label" style="font-weight:600; color: var(--kitty-dark-pink);">🌸 2. เลือกขั้นตอนที่ต้องการพิมพ์</label>
             <div id="steps_checkbox_list" class="mb-3">
-                <!-- เช็คบ็อกซ์จะถูกสร้างที่นี่ -->
-            </div>
+                </div>
             <div>
                 <button type="button" class="btn btn-sm btn-outline-cute fw-bold px-3" onclick="selectAllSteps(true)">☑️ เลือกทั้งหมด</button>
                 <button type="button" class="btn btn-sm btn-outline-secondary fw-bold px-3 ms-2" onclick="selectAllSteps(false)">☐ ยกเลิกทั้งหมด</button>
@@ -201,6 +208,36 @@
             <div class="col-6">
                 <button class="btn btn-cute-mint w-100" onclick="printSelectedSteps(true)">🖨️ พิมพ์พร้อมประวัติ</button>
             </div>
+        </div>
+    </div>
+</div>
+
+<div id="manualModal" class="modal-overlay">
+    <div class="manual-box card-stock">
+        <div class="d-flex justify-content-between align-items-center border-bottom pb-2 mb-3" style="border-color: var(--kitty-pink) !important;">
+            <h4 class="mb-0" style="color: var(--kitty-dark-pink); font-weight: 600;">📖 คู่มือการใช้งาน MULTI PRINT</h4>
+            <button class="btn btn-cute-mint btn-sm" onclick="printManual()">🖨️ พิมพ์คู่มือ</button>
+        </div>
+        
+        <div style="color: var(--text-main); font-size: 1.05rem; line-height: 1.6;">
+            <p><strong style="color: var(--kitty-dark-pink);">🌸 1. ค้นหาใบสั่งงาน</strong><br>
+            คลิกที่ช่องค้นหา แล้วพิมพ์หรือเลือกเลขที่ใบสั่งงาน (Order No) ที่ต้องการ ระบบจะดึงข้อมูลขั้นตอนการทำงานทั้งหมดของใบสั่งงานนั้นมาแสดงให้อัตโนมัติ</p>
+            
+            <p><strong style="color: var(--kitty-dark-pink);">🌸 2. เลือกขั้นตอนที่ต้องการพิมพ์</strong><br>
+            เมื่อเลือกใบสั่งงานแล้ว ระบบจะเลือกทุกขั้นตอนให้คุณโดยอัตโนมัติ (มีเครื่องหมายถูก) <br>
+            - หากต้องการพิมพ์แค่บางขั้นตอน สามารถกดติ๊กช่องเครื่องหมายถูกออกได้<br>
+            - ใช้ปุ่ม <b>"☑️ เลือกทั้งหมด"</b> หรือ <b>"☐ ยกเลิกทั้งหมด"</b> เพื่อความรวดเร็วในการเลือก</p>
+            
+            <p><strong style="color: var(--kitty-dark-pink);">🌸 3. การสั่งพิมพ์เอกสาร</strong><br>
+            - <b>🖨️ พิมพ์ฟอร์มเปล่า:</b> พิมพ์เฉพาะหัวเอกสารและตารางว่างๆ เพื่อนำไปให้พนักงานจดบันทึกหน้างาน<br>
+            - <b>🖨️ พิมพ์พร้อมประวัติ:</b> ระบบจะดึงข้อมูลการผลิตที่เคยบันทึกไว้ในระบบมาลงในตารางให้ด้วย (หากรายการของขั้นตอนนั้นมีเกิน 22 บรรทัด ระบบจะสร้างหน้าใหม่ให้โดยอัตโนมัติ)</p>
+            
+            <p><strong style="color: var(--kitty-dark-pink);">🌸 4. เริ่มต้นใหม่</strong><br>
+            หากต้องการเปลี่ยนใบสั่งงานใหม่ หรือล้างหน้าจอ ให้กดที่ปุ่ม <b>"🔄 เคลียร์ข้อมูล"</b> ขวาบน</p>
+        </div>
+
+        <div class="mt-4 text-center">
+            <button type="button" class="btn btn-cute-pink px-5" onclick="closeManual()">❌ ปิดหน้าต่าง</button>
         </div>
     </div>
 </div>
@@ -325,6 +362,51 @@
         });
     }
 
+    // ฟังก์ชันเปิด-ปิดคู่มือ
+    function openManual() {
+        document.getElementById('manualModal').style.display = 'flex';
+    }
+
+    function closeManual() {
+        document.getElementById('manualModal').style.display = 'none';
+    }
+
+    // ฟังก์ชันพิมพ์หน้าคู่มือ
+    function printManual() {
+        const manualContent = document.querySelector('.manual-box').cloneNode(true);
+        const buttons = manualContent.querySelectorAll('button');
+        buttons.forEach(btn => btn.remove()); // เอาปุ่มออกก่อนสั่งพิมพ์
+
+        const printWindow = window.open('', '_blank');
+        printWindow.document.write(`
+            <html>
+            <head>
+                <title>คู่มือการใช้งาน MULTI PRINT</title>
+                <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
+                <style>
+                    @page { size: A4 portrait; margin: 15mm; }
+                    body { font-family: 'Kanit', sans-serif; color: #333; line-height: 1.6; }
+                    h4 { color: #d81b60; border-bottom: 2px solid #ff69b4; padding-bottom: 10px; text-align: center; font-size: 24px; }
+                    p { margin-bottom: 15px; font-size: 16px; }
+                    strong { color: #d81b60; font-size: 18px; display: inline-block; margin-bottom: 5px; }
+                    .card-stock { padding: 20px; border: 2px solid #ff69b4; border-radius: 10px; }
+                </style>
+            </head>
+            <body>
+                <div class="card-stock">
+                    ${manualContent.innerHTML}
+                </div>
+            </body>
+            </html>
+        `);
+        printWindow.document.close();
+        printWindow.focus();
+        setTimeout(() => {
+            printWindow.print();
+            printWindow.close();
+        }, 300);
+    }
+
     async function printSelectedSteps(withData) {
         const orderId = document.getElementById('select_order').value;
         if (!orderId) {
@@ -390,91 +472,103 @@
 
             const currentUrl = `${baseUrl}?order_id=${encodeURIComponent(orderId)}&target_id=${encodeURIComponent(target.id_target)}`;
 
-            let tableRowsHtml = '';
-            let runningTotal = 0;
             const targetHistory = historyData.filter(h => String(h.id_target) === String(target.id_target));
+            const maxRowsPerPage = 22;
+            // คำนวณจำนวนหน้าที่จะใช้สำหรับขั้นตอนนี้
+            const totalPages = Math.max(1, Math.ceil(targetHistory.length / maxRowsPerPage));
             
-            for(let i = 0; i < 22; i++) {
-                if (i < targetHistory.length) {
-                    const log = targetHistory[i];
-                    let d = new Date(log.record_date);
-                    let dateFormatted = !isNaN(d) ? `${d.getDate().toString().padStart(2, '0')}/${(d.getMonth()+1).toString().padStart(2, '0')}/${d.getFullYear().toString().slice(-2)}` : '';
-                    
-                    const emp = globalData.employees.find(e => String(e.id_name) === String(log.id_name));
-                    const empText = emp ? emp.name : '';
-                    const produced = log.produced_amount || 0;
-                    const ngAmt = log.nogoods_amount || 0;
-                    const hWork = log.hour_work ? log.hour_work.toFixed(2) : ''; 
-                    runningTotal += produced;
+            let runningTotal = 0; // ยอดสะสมคงอยู่ตลอดทุกหน้าในขั้นตอนเดียวกัน
 
-                    tableRowsHtml += `<tr>
-                        <td>${dateFormatted}</td>
-                        <td>&nbsp;</td>
-                        <td>${produced.toLocaleString()}</td>
-                        <td style="font-weight: bold;">${runningTotal.toLocaleString()}</td>
-                        <td>${ngAmt > 0 ? ngAmt.toLocaleString() : '&nbsp;'}</td>
-                        <td>${hWork}</td>
-                        <td style="text-align: left; padding-left: 4px;">${empText}</td>
-                        <td>${log.remark ? log.remark : '&nbsp;'}</td>
-                    </tr>`;
-                } else {
-                    tableRowsHtml += `<tr><td>&nbsp;</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>`;
+            for (let page = 0; page < totalPages; page++) {
+                let tableRowsHtml = '';
+
+                for(let i = 0; i < maxRowsPerPage; i++) {
+                    const historyIndex = (page * maxRowsPerPage) + i;
+
+                    if (historyIndex < targetHistory.length) {
+                        const log = targetHistory[historyIndex];
+                        let d = new Date(log.record_date);
+                        let dateFormatted = !isNaN(d) ? `${d.getDate().toString().padStart(2, '0')}/${(d.getMonth()+1).toString().padStart(2, '0')}/${d.getFullYear().toString().slice(-2)}` : '';
+                        
+                        const emp = globalData.employees.find(e => String(e.id_name) === String(log.id_name));
+                        const empText = emp ? emp.name : '';
+                        const produced = log.produced_amount || 0;
+                        const ngAmt = log.nogoods_amount || 0;
+                        const hWork = log.hour_work ? log.hour_work.toFixed(2) : ''; 
+                        runningTotal += produced;
+
+                        tableRowsHtml += `<tr>
+                            <td>${dateFormatted}</td>
+                            <td>&nbsp;</td>
+                            <td>${produced.toLocaleString()}</td>
+                            <td style="font-weight: bold;">${runningTotal.toLocaleString()}</td>
+                            <td>${ngAmt > 0 ? ngAmt.toLocaleString() : '&nbsp;'}</td>
+                            <td>${hWork}</td>
+                            <td style="text-align: left; padding-left: 4px;">${empText}</td>
+                            <td>${log.remark ? log.remark : '&nbsp;'}</td>
+                        </tr>`;
+                    } else {
+                        tableRowsHtml += `<tr><td>&nbsp;</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>`;
+                    }
                 }
-            }
 
-            allCardsHtml.push(`
-                <div class="print-card">
-                    <div class="print-header-top">
-                        <div style="flex-grow: 1; overflow: hidden;">
-                            <div class="print-title-area"><h3>ใบความก้าวหน้าของการผลิต</h3></div>
-                            <div class="print-meta-row">
-                                <span class="print-label">ใบสั่งงานเลขที่:</span> 
-                                <span class="print-value" style="flex: 1.4;">${orderNo}</span>
-                                <span class="print-label" style="margin-left: 12px;">ขั้นตอนงาน:</span> 
-                                <span class="print-value" style="flex: 1.2;">${stepNameText}</span>
+                // แสดงตัวบ่งบอกจำนวนหน้าหากมีมากกว่า 1 หน้า
+                let pageIndicatorText = totalPages > 1 ? ` <span style="font-size:12px; color:#d81b60;">(แผ่นที่ ${page + 1}/${totalPages})</span>` : '';
+
+                allCardsHtml.push(`
+                    <div class="print-card">
+                        <div class="print-header-top">
+                            <div style="flex-grow: 1; overflow: hidden;">
+                                <div class="print-title-area"><h3>ใบความก้าวหน้าของการผลิต${pageIndicatorText}</h3></div>
+                                <div class="print-meta-row">
+                                    <span class="print-label">ใบสั่งงานเลขที่:</span> 
+                                    <span class="print-value" style="flex: 1.4;">${orderNo}</span>
+                                    <span class="print-label" style="margin-left: 12px;">ขั้นตอนงาน:</span> 
+                                    <span class="print-value" style="flex: 1.2;">${stepNameText}</span>
+                                </div>
+                                <div class="print-meta-row">
+                                    <span class="print-label">ชนิดงาน:</span> <span class="print-value" style="flex: 1;">${workCodeText}</span>
+                                </div>
+                                <div class="print-meta-row">
+                                    <span class="print-label">จำนวนชิ้นงานสั่งผลิต:</span> <span class="print-value">${quantity}</span>
+                                </div>
+                                <div class="print-meta-row">
+                                    <span class="print-label">วันที่เริ่ม:</span> <span class="print-value" style="flex: 1;">${stepStartDateStr}</span>
+                                    <span class="print-label" style="margin-left: 10px;">วันที่เสร็จ:</span> <span class="print-value" style="flex: 1;">${stepEndDateStr}</span>
+                                </div>
                             </div>
-                            <div class="print-meta-row">
-                                <span class="print-label">ชนิดงาน:</span> <span class="print-value" style="flex: 1;">${workCodeText}</span>
-                            </div>
-                            <div class="print-meta-row">
-                                <span class="print-label">จำนวนชิ้นงานสั่งผลิต:</span> <span class="print-value">${quantity}</span>
-                            </div>
-                            <div class="print-meta-row">
-                                <span class="print-label">วันที่เริ่ม:</span> <span class="print-value" style="flex: 1;">${stepStartDateStr}</span>
-                                <span class="print-label" style="margin-left: 10px;">วันที่เสร็จ:</span> <span class="print-value" style="flex: 1;">${stepEndDateStr}</span>
+                            <div class="print-qr-box">
+                                <div class="qrcode-target" data-url="${currentUrl}"></div>
+                                <span>สแกนเข้าสู่ขั้นตอน</span>
+                                <div class="print-code-text">[ ${printCode} ]</div>
                             </div>
                         </div>
-                        <div class="print-qr-box">
-                            <div class="qrcode-target" data-url="${currentUrl}"></div>
-                            <span>สแกนเข้าสู่ขั้นตอน</span>
-                            <div class="print-code-text">[ ${printCode} ]</div>
+                        
+                        <div class="table-wrapper">
+                            <table class="print-table">
+                                <thead>
+                                    <tr>
+                                        <th width="12%">วันที่</th>
+                                        <th width="11%">ตัวเลขตอนเลิกงาน</th>
+                                        <th width="13%">ผลิตได้/วัน</th>
+                                        <th width="14%">สะสม</th>
+                                        <th width="8%">เสีย</th>
+                                        <th width="9%">ชั่วโมง</th>
+                                        <th width="18%">ชื่อคนทำ</th>
+                                        <th width="15%">หมายเหตุ</th>
+                                    </tr>
+                                </thead>
+                                <tbody>${tableRowsHtml}</tbody>
+                            </table>
+                        </div>
+                        
+                        <div class="print-footer">
+                            <span>F-PR-005-00</span>
+                            <span>DAILY PRODUCTION TRACKER</span>
                         </div>
                     </div>
-                    
-                    <div class="table-wrapper">
-                        <table class="print-table">
-                            <thead>
-                                <tr>
-                                    <th width="12%">วันที่</th>
-                                    <th width="11%">ตัวเลขตอนเลิกงาน</th>
-                                    <th width="13%">ผลิตได้/วัน</th>
-                                    <th width="14%">สะสม</th>
-                                    <th width="8%">เสีย</th>
-                                    <th width="9%">ชั่วโมง</th>
-                                    <th width="18%">ชื่อคนทำ</th>
-                                    <th width="15%">หมายเหตุ</th>
-                                </tr>
-                            </thead>
-                            <tbody>${tableRowsHtml}</tbody>
-                        </table>
-                    </div>
-                    
-                    <div class="print-footer">
-                        <span>F-PR-005-00</span>
-                        <span>DAILY PRODUCTION TRACKER</span>
-                    </div>
-                </div>
-            `);
+                `);
+            }
         });
 
         let finalPagesHtml = '';
