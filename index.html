@@ -151,7 +151,8 @@
         .print-value { border-bottom: 1.5px dotted #000; padding-left: 5px; min-height: 15px; white-space: nowrap; overflow: hidden; }
 
         .print-qr-box { text-align: center; }
-        .print-qr-box canvas, .print-qr-box img { width: 58px !important; height: 58px !important; margin: 0 auto; }
+        /* ปรับขนาดการแสดงผลบนกระดาษให้ใหญ่ขึ้นเล็กน้อยเป็น 75px */
+        .print-qr-box canvas, .print-qr-box img { width: 75px !important; height: 75px !important; margin: 0 auto; }
         .print-qr-box span { display: block; font-size: 9px; margin-top: 1px; font-weight: bold; }
         .print-code-text { font-size: 13px; font-weight: bold; letter-spacing: 1px; margin-top: 2px; }
 
@@ -362,7 +363,6 @@
         });
     }
 
-    // ฟังก์ชันเปิด-ปิดคู่มือ
     function openManual() {
         document.getElementById('manualModal').style.display = 'flex';
     }
@@ -371,11 +371,10 @@
         document.getElementById('manualModal').style.display = 'none';
     }
 
-    // ฟังก์ชันพิมพ์หน้าคู่มือ
     function printManual() {
         const manualContent = document.querySelector('.manual-box').cloneNode(true);
         const buttons = manualContent.querySelectorAll('button');
-        buttons.forEach(btn => btn.remove()); // เอาปุ่มออกก่อนสั่งพิมพ์
+        buttons.forEach(btn => btn.remove()); 
 
         const printWindow = window.open('', '_blank');
         printWindow.document.write(`
@@ -474,10 +473,9 @@
 
             const targetHistory = historyData.filter(h => String(h.id_target) === String(target.id_target));
             const maxRowsPerPage = 22;
-            // คำนวณจำนวนหน้าที่จะใช้สำหรับขั้นตอนนี้
             const totalPages = Math.max(1, Math.ceil(targetHistory.length / maxRowsPerPage));
             
-            let runningTotal = 0; // ยอดสะสมคงอยู่ตลอดทุกหน้าในขั้นตอนเดียวกัน
+            let runningTotal = 0; 
 
             for (let page = 0; page < totalPages; page++) {
                 let tableRowsHtml = '';
@@ -512,7 +510,6 @@
                     }
                 }
 
-                // แสดงตัวบ่งบอกจำนวนหน้าหากมีมากกว่า 1 หน้า
                 let pageIndicatorText = totalPages > 1 ? ` <span style="font-size:12px; color:#d81b60;">(แผ่นที่ ${page + 1}/${totalPages})</span>` : '';
 
                 allCardsHtml.push(`
@@ -586,11 +583,16 @@
 
         document.getElementById('printArea').innerHTML = finalPagesHtml;
 
+        // สั่งสร้าง QR Code ที่ความละเอียดสูง (256x256) และปรับ CorrectLevel
         document.querySelectorAll('.qrcode-target').forEach(el => {
             el.innerHTML = "";
             new QRCode(el, {
-                text: el.getAttribute('data-url'), width: 58, height: 58,
-                colorDark: "#000000", colorLight: "#ffffff", correctLevel: QRCode.CorrectLevel.M
+                text: el.getAttribute('data-url'), 
+                width: 256,   // สร้างด้วยจำนวนพิกเซลที่มากขึ้นเพื่อให้คมชัด
+                height: 256,  // สร้างด้วยจำนวนพิกเซลที่มากขึ้นเพื่อให้คมชัด
+                colorDark: "#000000", 
+                colorLight: "#ffffff", 
+                correctLevel: QRCode.CorrectLevel.L // ลดระดับ Error Correction ลงเพื่อให้สี่เหลี่ยมด้านในใหญ่ขึ้น สแกนง่ายขึ้น
             });
         });
 
