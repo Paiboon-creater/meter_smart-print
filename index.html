@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>MULTI PRINT // KITTY थीम</title>
+    <title>MULTI PRINT // KITTY THEME</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <link href="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/css/tom-select.bootstrap5.min.css" rel="stylesheet">
@@ -50,22 +50,32 @@
             text-shadow: 1px 1px 2px rgba(255, 105, 180, 0.3);
         }
 
-        .ts-control, .ts-wrapper.single.input-active .ts-control {
+        .ts-control, .ts-wrapper.multi.input-active .ts-control {
             background-color: #ffffff !important;
             border: 2px solid var(--kitty-pink) !important;
             border-radius: 10px !important;
-            padding: 12px 15px !important;
+            padding: 8px 15px !important;
+            min-height: 50px;
         }
         .ts-control > input { 
             color: #333333 !important; 
             font-size: 1.1rem; 
             font-family: 'Kanit', sans-serif;
         }
+        /* Style for selected tags in multi-select */
         .ts-control .item { 
+            background-color: #fce4ec !important;
             color: var(--kitty-dark-pink) !important; 
-            font-size: 1.1rem; 
+            border: 1px solid var(--kitty-pink) !important;
+            border-radius: 6px !important;
+            font-size: 1rem; 
             font-weight: 600; 
+            padding: 4px 8px !important;
+            margin: 2px !important;
         }
+        .ts-control .item .remove { border-left-color: var(--kitty-pink) !important; color: var(--kitty-dark-pink) !important; }
+        .ts-control .item .remove:hover { background-color: var(--kitty-pink) !important; color: white !important; }
+        
         .ts-dropdown { 
             background-color: #ffffff !important; 
             border: 2px solid var(--kitty-pink) !important; 
@@ -92,7 +102,7 @@
             background-color: #fffafb;
             border: 2px dashed var(--kitty-pink);
             border-radius: 12px;
-            max-height: 250px; 
+            max-height: 350px; /* เพิ่มความสูงเผื่อเลือกหลายใบสั่ง */
             overflow-y: auto;
             padding: 15px;
         }
@@ -151,7 +161,6 @@
         .print-value { border-bottom: 1.5px dotted #000; padding-left: 5px; min-height: 15px; white-space: nowrap; overflow: hidden; }
 
         .print-qr-box { text-align: center; }
-        /* ปรับขนาดการแสดงผลบนกระดาษให้ใหญ่ขึ้นเล็กน้อยเป็น 75px */
         .print-qr-box canvas, .print-qr-box img { width: 75px !important; height: 75px !important; margin: 0 auto; }
         .print-qr-box span { display: block; font-size: 9px; margin-top: 1px; font-weight: bold; }
         .print-code-text { font-size: 13px; font-weight: bold; letter-spacing: 1px; margin-top: 2px; }
@@ -184,11 +193,12 @@
     
     <div class="card card-stock">
         <div class="d-flex justify-content-between align-items-center mb-2">
-            <label class="form-label mb-0" style="font-weight:600; color: var(--kitty-dark-pink);">🔍 1. ค้นหาและเลือกเลขที่ใบสั่ง</label>
+            <label class="form-label mb-0" style="font-weight:600; color: var(--kitty-dark-pink);">🔍 1. ค้นหาและเลือกเลขที่ใบสั่ง (เลือกได้หลายใบ)</label>
             <button type="button" class="btn-clear" onclick="clearSelection()">🔄 เคลียร์ข้อมูล</button>
         </div>
         
-        <select id="select_order" class="form-select mb-4" placeholder="พิมพ์ค้นหาใบสั่งงานตรงนี้เลย..."></select>
+        <!-- เพิ่ม attribute multiple เพื่อให้เลือกได้หลายอัน -->
+        <select id="select_order" class="form-select mb-4" placeholder="พิมพ์ค้นหาแล้วคลิกเลือกได้เลย..." multiple></select>
         
         <div id="step_info" class="mb-3" style="font-size: 1rem; font-weight: 600; color: var(--kitty-dark-pink); display: none;"></div>
 
@@ -222,19 +232,19 @@
         
         <div style="color: var(--text-main); font-size: 1.05rem; line-height: 1.6;">
             <p><strong style="color: var(--kitty-dark-pink);">🌸 1. ค้นหาใบสั่งงาน</strong><br>
-            คลิกที่ช่องค้นหา แล้วพิมพ์หรือเลือกเลขที่ใบสั่งงาน (Order No) ที่ต้องการ ระบบจะดึงข้อมูลขั้นตอนการทำงานทั้งหมดของใบสั่งงานนั้นมาแสดงให้อัตโนมัติ</p>
+            คลิกที่ช่องค้นหา แล้วพิมพ์ค้นหาใบสั่งงาน <br>คุณสามารถ <b>คลิกเลือกได้ทีละหลายๆ ใบสั่งงานตามที่ต้องการ</b> ระบบจะดึงข้อมูลขั้นตอนการทำงานทั้งหมดของทุกใบสั่งงานมาแสดงรวมให้อัตโนมัติ</p>
             
             <p><strong style="color: var(--kitty-dark-pink);">🌸 2. เลือกขั้นตอนที่ต้องการพิมพ์</strong><br>
-            เมื่อเลือกใบสั่งงานแล้ว ระบบจะเลือกทุกขั้นตอนให้คุณโดยอัตโนมัติ (มีเครื่องหมายถูก) <br>
+            ระบบจะจัดกลุ่มขั้นตอนแยกตามเลขที่ใบสั่งให้ดูง่าย และเลือกทุกขั้นตอนให้คุณโดยอัตโนมัติ (มีเครื่องหมายถูก) <br>
             - หากต้องการพิมพ์แค่บางขั้นตอน สามารถกดติ๊กช่องเครื่องหมายถูกออกได้<br>
-            - ใช้ปุ่ม <b>"☑️ เลือกทั้งหมด"</b> หรือ <b>"☐ ยกเลิกทั้งหมด"</b> เพื่อความรวดเร็วในการเลือก</p>
+            - ใช้ปุ่ม <b>"☑️ เลือกทั้งหมด"</b> หรือ <b>"☐ ยกเลิกทั้งหมด"</b> เพื่อความรวดเร็วในการจัดการ</p>
             
             <p><strong style="color: var(--kitty-dark-pink);">🌸 3. การสั่งพิมพ์เอกสาร</strong><br>
             - <b>🖨️ พิมพ์ฟอร์มเปล่า:</b> พิมพ์เฉพาะหัวเอกสารและตารางว่างๆ เพื่อนำไปให้พนักงานจดบันทึกหน้างาน<br>
             - <b>🖨️ พิมพ์พร้อมประวัติ:</b> ระบบจะดึงข้อมูลการผลิตที่เคยบันทึกไว้ในระบบมาลงในตารางให้ด้วย (หากรายการของขั้นตอนนั้นมีเกิน 22 บรรทัด ระบบจะสร้างหน้าใหม่ให้โดยอัตโนมัติ)</p>
             
             <p><strong style="color: var(--kitty-dark-pink);">🌸 4. เริ่มต้นใหม่</strong><br>
-            หากต้องการเปลี่ยนใบสั่งงานใหม่ หรือล้างหน้าจอ ให้กดที่ปุ่ม <b>"🔄 เคลียร์ข้อมูล"</b> ขวาบน</p>
+            หากต้องการล้างหน้าจอและเอาใบสั่งงานที่เลือกไว้ออกทั้งหมด ให้กดที่ปุ่ม <b>"🔄 เคลียร์ข้อมูล"</b> ขวาบน</p>
         </div>
 
         <div class="mt-4 text-center">
@@ -281,15 +291,17 @@
             globalData.orderSteps = orderStepsRes;
 
             const select = document.getElementById('select_order');
-            select.innerHTML = `<option value="">-- พิมพ์ค้นหาใบสั่งงานตรงนี้ --</option>`;
+            select.innerHTML = ``;
             globalData.orders.forEach(o => {
                 select.innerHTML += `<option value="${o.id_order}">${o.order_no}</option>`;
             });
 
+            // เปิดใช้งานโหมดเลือกหลายใบสั่ง
             orderSelectInstance = new TomSelect("#select_order", {
                 create: false,
                 sortField: false,
-                onChange: function(value) { showOrderInfo(value); }
+                plugins: ['remove_button'],
+                onChange: function(values) { showOrdersInfo(values); }
             });
 
             Swal.close();
@@ -306,52 +318,62 @@
         document.getElementById('steps_selection_container').style.display = 'none';
     }
 
-    function showOrderInfo(orderId) {
+    // แก้ไขฟังก์ชันเป็นโหมด Multi-select
+    function showOrdersInfo(orderIds) {
         const infoDiv = document.getElementById('step_info');
         const stepsContainer = document.getElementById('steps_selection_container');
         const stepsList = document.getElementById('steps_checkbox_list');
 
-        if (!orderId) {
+        if (!orderIds || orderIds.length === 0) {
             infoDiv.style.display = 'none';
             stepsContainer.style.display = 'none';
             return;
         }
         
-        const order = globalData.orders.find(o => String(o.id_order) === String(orderId));
-        if (order && order.id_work) {
-            const targetsForOrder = globalData.targets
-                .filter(t => String(t.id_work) === String(order.id_work))
-                .sort((a,b) => parseInt(a.id_target) - parseInt(b.id_target));
+        let totalSteps = 0;
+        let html = '';
 
-            if (targetsForOrder.length > 0) {
-                infoDiv.innerHTML = `✨ ใบสั่งงานนี้มีทั้งหมด <b>${targetsForOrder.length}</b> ขั้นตอนค่ะ`;
-                infoDiv.style.display = 'block';
-                
-                let html = '';
-                targetsForOrder.forEach((target, index) => {
-                    const stepIndex = index + 1;
-                    const printCode = String(order.id_order).padStart(3, '0') + String(stepIndex).padStart(2, '0');
-                    const stepObj = globalData.steps.find(s => String(s.id_step) === String(target.id_step));
-                    const stepNameText = stepObj ? stepObj.step_name : `ไม่ระบุชื่อขั้นตอน`;
+        orderIds.forEach(orderId => {
+            const order = globalData.orders.find(o => String(o.id_order) === String(orderId));
+            if (order && order.id_work) {
+                const targetsForOrder = globalData.targets
+                    .filter(t => String(t.id_work) === String(order.id_work))
+                    .sort((a,b) => parseInt(a.id_target) - parseInt(b.id_target));
+
+                if (targetsForOrder.length > 0) {
+                    // สร้างกล่องจัดกลุ่มตามใบสั่ง
+                    html += `<div class="mb-3 p-3 rounded" style="background-color: #ffffff; border: 1px solid var(--kitty-pink); box-shadow: 0 2px 4px rgba(255,105,180,0.1);">`;
+                    html += `<h5 style="color: var(--kitty-dark-pink); font-weight: 600; margin-bottom: 12px; border-bottom: 2px dashed #ffe4e6; padding-bottom: 8px;">📦 ใบสั่งงาน: ${order.order_no}</h5>`;
                     
-                    html += `
-                    <div class="form-check mb-2">
-                        <input class="form-check-input step-checkbox" type="checkbox" value="${target.id_target}" id="chk_step_${target.id_target}" checked>
-                        <label class="form-check-label" style="color: #4a4a4a; font-weight: 600;" for="chk_step_${target.id_target}">
-                            <span style="color:#d81b60; font-weight:bold; background: #fce4ec; padding: 2px 8px; border-radius: 6px;">[ ${printCode} ]</span> 🌸 ${stepNameText}
-                        </label>
-                    </div>
-                    `;
-                });
-                stepsList.innerHTML = html;
-                stepsContainer.style.display = 'block';
-            } else {
-                infoDiv.innerHTML = `❌ ไม่พบการตั้งค่าขั้นตอนทำงานสำหรับใบสั่งนี้`;
-                infoDiv.style.display = 'block';
-                stepsContainer.style.display = 'none';
+                    targetsForOrder.forEach((target, index) => {
+                        totalSteps++;
+                        const stepIndex = index + 1;
+                        const printCode = String(order.id_order).padStart(3, '0') + String(stepIndex).padStart(2, '0');
+                        const stepObj = globalData.steps.find(s => String(s.id_step) === String(target.id_step));
+                        const stepNameText = stepObj ? stepObj.step_name : `ไม่ระบุชื่อขั้นตอน`;
+                        
+                        // ฝังทั้ง order_id และ target_id ลงใน value ของ Checkbox
+                        html += `
+                        <div class="form-check mb-2 ms-2">
+                            <input class="form-check-input step-checkbox" type="checkbox" value="${order.id_order}|${target.id_target}" id="chk_step_${order.id_order}_${target.id_target}" checked>
+                            <label class="form-check-label" style="color: #4a4a4a; font-weight: 600;" for="chk_step_${order.id_order}_${target.id_target}">
+                                <span style="color:#d81b60; font-weight:bold; background: #fff0f5; padding: 2px 8px; border-radius: 6px; border: 1px solid #ffb6c1;">[ ${printCode} ]</span> 🌸 ${stepNameText}
+                            </label>
+                        </div>
+                        `;
+                    });
+                    html += `</div>`;
+                }
             }
+        });
+
+        if (totalSteps > 0) {
+            infoDiv.innerHTML = `✨ เลือกไว้ทั้งหมด <b>${orderIds.length}</b> ใบสั่งงาน รวม <b>${totalSteps}</b> ขั้นตอนค่ะ`;
+            infoDiv.style.display = 'block';
+            stepsList.innerHTML = html;
+            stepsContainer.style.display = 'block';
         } else {
-            infoDiv.innerHTML = `❌ ใบสั่งงานนี้ยังไม่มีข้อมูลรหัสชิ้นงานในระบบ`;
+            infoDiv.innerHTML = `❌ ใบสั่งงานที่เลือกยังไม่มีข้อมูลรหัสชิ้นงานหรือขั้นตอนค่ะ`;
             infoDiv.style.display = 'block';
             stepsContainer.style.display = 'none';
         }
@@ -407,71 +429,77 @@
     }
 
     async function printSelectedSteps(withData) {
-        const orderId = document.getElementById('select_order').value;
-        if (!orderId) {
-            swalKitty.fire({icon: 'warning', title: 'แจ้งเตือน', text: 'กรุณาเลือกเลขที่ใบสั่งก่อนนะคะ'});
-            return;
-        }
-
-        const orderObj = globalData.orders.find(o => String(o.id_order) === String(orderId));
-        if (!orderObj || !orderObj.id_work) {
-            swalKitty.fire({icon: 'error', title: 'ผิดพลาด', text: 'ใบสั่งนี้ไม่มีข้อมูลรหัสชิ้นงาน'});
-            return;
-        }
-
-        const selectedTargetIds = Array.from(document.querySelectorAll('.step-checkbox:checked')).map(chk => chk.value);
-        if (selectedTargetIds.length === 0) {
+        // ดึง Checkbox ที่โดนติ๊กเลือกทั้งหมดมา
+        const selectedCheckboxes = Array.from(document.querySelectorAll('.step-checkbox:checked'));
+        
+        if (selectedCheckboxes.length === 0) {
             swalKitty.fire({icon: 'warning', title: 'แจ้งเตือน', text: 'กรุณาติ๊กเลือกอย่างน้อย 1 ขั้นตอนเพื่อสั่งพิมพ์ค่ะ'});
             return;
         }
 
-        const targetsForOrder = globalData.targets
-            .filter(t => String(t.id_work) === String(orderObj.id_work))
-            .sort((a,b) => parseInt(a.id_target) - parseInt(b.id_target));
-
         swalKitty.fire({ title: 'กำลังเตรียมข้อมูลพริ้นต์...', allowOutsideClick: false, didOpen: () => { Swal.showLoading() } });
+
+        // แปลง Value ของ Checkbox ให้เป็น Object ของ orderId และ targetId
+        const selectedItems = selectedCheckboxes.map(chk => {
+            const parts = chk.value.split('|');
+            return { orderId: parts[0], targetId: parts[1] };
+        });
+
+        // ดึงแค่เลข Order ที่ไม่ซ้ำกัน เพื่อไปคิวรี่ Database
+        const uniqueOrderIds = [...new Set(selectedItems.map(item => item.orderId))];
 
         let historyData = [];
         if (withData) {
             try {
-                const res = await fetch(`${BASE_URL}/daily_production?id_order=eq.${orderId}&order=record_date.asc`, { headers });
+                // คิวรี่รวดเดียวสำหรับทุกใบสั่งที่ถูกเลือก
+                const res = await fetch(`${BASE_URL}/daily_production?id_order=in.(${uniqueOrderIds.join(',')})&order=record_date.asc`, { headers });
                 if (res.ok) historyData = await res.json();
             } catch (e) {
                 console.error("ดึงข้อมูลประวัติไม่สำเร็จ", e);
             }
         }
 
-        const workObj = globalData.works.find(w => String(w.id_work) === String(orderObj.id_work));
-        const workCodeText = workObj ? workObj.work_code : "-";
-        const orderNo = orderObj.order_no || '-';
-        const quantity = orderObj.quantity ? parseInt(orderObj.quantity).toLocaleString() + ' ชิ้น' : '-';
         const baseUrl = 'https://paiboon-creater.github.io/Data_Information_Jaguar_productions/daily_production.html';
-
         let allCardsHtml = [];
 
-        targetsForOrder.forEach((target, index) => {
-            if (!selectedTargetIds.includes(String(target.id_target))) {
-                return; 
-            }
+        // วนลูปสร้างหน้าเอกสารตามลำดับที่เลือก
+        selectedItems.forEach(item => {
+            const orderId = item.orderId;
+            const targetId = item.targetId;
 
-            const stepIndex = index + 1;
+            const orderObj = globalData.orders.find(o => String(o.id_order) === String(orderId));
+            if (!orderObj) return;
+
+            const workObj = globalData.works.find(w => String(w.id_work) === String(orderObj.id_work));
+            const workCodeText = workObj ? workObj.work_code : "-";
+            const orderNo = orderObj.order_no || '-';
+            const quantity = orderObj.quantity ? parseInt(orderObj.quantity).toLocaleString() + ' ชิ้น' : '-';
+
+            const targetObj = globalData.targets.find(t => String(t.id_target) === String(targetId));
+            if (!targetObj) return;
+
+            // คำนวณลำดับขั้นตอนของใบสั่งนั้นๆ เพื่อสร้าง printCode
+            const targetsForOrder = globalData.targets
+                .filter(t => String(t.id_work) === String(orderObj.id_work))
+                .sort((a,b) => parseInt(a.id_target) - parseInt(b.id_target));
+            const stepIndex = targetsForOrder.findIndex(t => String(t.id_target) === String(targetId)) + 1;
             const printCode = String(orderObj.id_order).padStart(3, '0') + String(stepIndex).padStart(2, '0');
 
-            const stepObj = globalData.steps.find(s => String(s.id_step) === String(target.id_step));
+            const stepObj = globalData.steps.find(s => String(s.id_step) === String(targetObj.id_step));
             const stepNameText = stepObj ? stepObj.step_name : "-";
             
             let stepStartDateStr = orderObj.start_date ? formatDateStr(orderObj.start_date) : "-";
             let stepEndDateStr = orderObj.end_date ? formatDateStr(orderObj.end_date) : "-";
             
-            const orderStepObj = globalData.orderSteps.find(os => String(os.id_order) === String(orderId) && String(os.id_step) === String(target.id_step));
+            const orderStepObj = globalData.orderSteps.find(os => String(os.id_order) === String(orderId) && String(os.id_step) === String(targetObj.id_step));
             if (orderStepObj) {
                 if (orderStepObj.start_date) stepStartDateStr = formatDateStr(orderStepObj.start_date);
                 if (orderStepObj.end_date) stepEndDateStr = formatDateStr(orderStepObj.end_date);
             }
 
-            const currentUrl = `${baseUrl}?order_id=${encodeURIComponent(orderId)}&target_id=${encodeURIComponent(target.id_target)}`;
+            const currentUrl = `${baseUrl}?order_id=${encodeURIComponent(orderId)}&target_id=${encodeURIComponent(targetId)}`;
 
-            const targetHistory = historyData.filter(h => String(h.id_target) === String(target.id_target));
+            const targetHistory = historyData.filter(h => String(h.id_target) === String(targetId));
             const maxRowsPerPage = 22;
             const totalPages = Math.max(1, Math.ceil(targetHistory.length / maxRowsPerPage));
             
@@ -583,16 +611,15 @@
 
         document.getElementById('printArea').innerHTML = finalPagesHtml;
 
-        // สั่งสร้าง QR Code ที่ความละเอียดสูง (256x256) และปรับ CorrectLevel
         document.querySelectorAll('.qrcode-target').forEach(el => {
             el.innerHTML = "";
             new QRCode(el, {
                 text: el.getAttribute('data-url'), 
-                width: 256,   // สร้างด้วยจำนวนพิกเซลที่มากขึ้นเพื่อให้คมชัด
-                height: 256,  // สร้างด้วยจำนวนพิกเซลที่มากขึ้นเพื่อให้คมชัด
+                width: 256,   
+                height: 256,  
                 colorDark: "#000000", 
                 colorLight: "#ffffff", 
-                correctLevel: QRCode.CorrectLevel.L // ลดระดับ Error Correction ลงเพื่อให้สี่เหลี่ยมด้านในใหญ่ขึ้น สแกนง่ายขึ้น
+                correctLevel: QRCode.CorrectLevel.L 
             });
         });
 
