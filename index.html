@@ -102,7 +102,7 @@
             background-color: #fffafb;
             border: 2px dashed var(--kitty-pink);
             border-radius: 12px;
-            max-height: 350px; /* เพิ่มความสูงเผื่อเลือกหลายใบสั่ง */
+            max-height: 350px; 
             overflow-y: auto;
             padding: 15px;
         }
@@ -168,7 +168,7 @@
         .table-wrapper { flex-grow: 1; display: flex; flex-direction: column; }
         
         .print-table { width: 100%; height: 100%; border-collapse: collapse; font-size: 10px; table-layout: fixed; }
-        .print-table tr { height: 4.34%; } 
+        .print-table tr { height: 5%; } /* ปรับความสูงแถวให้เหมาะกับ 19 บรรทัด */
         .print-table th, .print-table td { border: 1px solid #000; padding: 1px 2px; text-align: center; word-wrap: break-word; overflow: hidden; }
         .print-table th { background-color: #e0e0e0 !important; font-size: 10px; font-weight: bold; -webkit-print-color-adjust: exact; }
         .print-table td:first-child { white-space: nowrap; }
@@ -197,7 +197,6 @@
             <button type="button" class="btn-clear" onclick="clearSelection()">🔄 เคลียร์ข้อมูล</button>
         </div>
         
-        <!-- เพิ่ม attribute multiple เพื่อให้เลือกได้หลายอัน -->
         <select id="select_order" class="form-select mb-4" placeholder="พิมพ์ค้นหาแล้วคลิกเลือกได้เลย..." multiple></select>
         
         <div id="step_info" class="mb-3" style="font-size: 1rem; font-weight: 600; color: var(--kitty-dark-pink); display: none;"></div>
@@ -241,7 +240,7 @@
             
             <p><strong style="color: var(--kitty-dark-pink);">🌸 3. การสั่งพิมพ์เอกสาร</strong><br>
             - <b>🖨️ พิมพ์ฟอร์มเปล่า:</b> พิมพ์เฉพาะหัวเอกสารและตารางว่างๆ เพื่อนำไปให้พนักงานจดบันทึกหน้างาน<br>
-            - <b>🖨️ พิมพ์พร้อมประวัติ:</b> ระบบจะดึงข้อมูลการผลิตที่เคยบันทึกไว้ในระบบมาลงในตารางให้ด้วย (หากรายการของขั้นตอนนั้นมีเกิน 22 บรรทัด ระบบจะสร้างหน้าใหม่ให้โดยอัตโนมัติ)</p>
+            - <b>🖨️ พิมพ์พร้อมประวัติ:</b> ระบบจะดึงข้อมูลการผลิตที่เคยบันทึกไว้ในระบบมาลงในตารางให้ด้วย (หากรายการของขั้นตอนนั้นมีเกิน 19 บรรทัด ระบบจะสร้างหน้าใหม่ให้โดยอัตโนมัติ)</p>
             
             <p><strong style="color: var(--kitty-dark-pink);">🌸 4. เริ่มต้นใหม่</strong><br>
             หากต้องการล้างหน้าจอและเอาใบสั่งงานที่เลือกไว้ออกทั้งหมด ให้กดที่ปุ่ม <b>"🔄 เคลียร์ข้อมูล"</b> ขวาบน</p>
@@ -296,7 +295,6 @@
                 select.innerHTML += `<option value="${o.id_order}">${o.order_no}</option>`;
             });
 
-            // เปิดใช้งานโหมดเลือกหลายใบสั่ง
             orderSelectInstance = new TomSelect("#select_order", {
                 create: false,
                 sortField: false,
@@ -318,7 +316,6 @@
         document.getElementById('steps_selection_container').style.display = 'none';
     }
 
-    // แก้ไขฟังก์ชันเป็นโหมด Multi-select
     function showOrdersInfo(orderIds) {
         const infoDiv = document.getElementById('step_info');
         const stepsContainer = document.getElementById('steps_selection_container');
@@ -341,7 +338,6 @@
                     .sort((a,b) => parseInt(a.id_target) - parseInt(b.id_target));
 
                 if (targetsForOrder.length > 0) {
-                    // สร้างกล่องจัดกลุ่มตามใบสั่ง
                     html += `<div class="mb-3 p-3 rounded" style="background-color: #ffffff; border: 1px solid var(--kitty-pink); box-shadow: 0 2px 4px rgba(255,105,180,0.1);">`;
                     html += `<h5 style="color: var(--kitty-dark-pink); font-weight: 600; margin-bottom: 12px; border-bottom: 2px dashed #ffe4e6; padding-bottom: 8px;">📦 ใบสั่งงาน: ${order.order_no}</h5>`;
                     
@@ -352,7 +348,6 @@
                         const stepObj = globalData.steps.find(s => String(s.id_step) === String(target.id_step));
                         const stepNameText = stepObj ? stepObj.step_name : `ไม่ระบุชื่อขั้นตอน`;
                         
-                        // ฝังทั้ง order_id และ target_id ลงใน value ของ Checkbox
                         html += `
                         <div class="form-check mb-2 ms-2">
                             <input class="form-check-input step-checkbox" type="checkbox" value="${order.id_order}|${target.id_target}" id="chk_step_${order.id_order}_${target.id_target}" checked>
@@ -429,7 +424,6 @@
     }
 
     async function printSelectedSteps(withData) {
-        // ดึง Checkbox ที่โดนติ๊กเลือกทั้งหมดมา
         const selectedCheckboxes = Array.from(document.querySelectorAll('.step-checkbox:checked'));
         
         if (selectedCheckboxes.length === 0) {
@@ -439,19 +433,16 @@
 
         swalKitty.fire({ title: 'กำลังเตรียมข้อมูลพริ้นต์...', allowOutsideClick: false, didOpen: () => { Swal.showLoading() } });
 
-        // แปลง Value ของ Checkbox ให้เป็น Object ของ orderId และ targetId
         const selectedItems = selectedCheckboxes.map(chk => {
             const parts = chk.value.split('|');
             return { orderId: parts[0], targetId: parts[1] };
         });
 
-        // ดึงแค่เลข Order ที่ไม่ซ้ำกัน เพื่อไปคิวรี่ Database
         const uniqueOrderIds = [...new Set(selectedItems.map(item => item.orderId))];
 
         let historyData = [];
         if (withData) {
             try {
-                // คิวรี่รวดเดียวสำหรับทุกใบสั่งที่ถูกเลือก
                 const res = await fetch(`${BASE_URL}/daily_production?id_order=in.(${uniqueOrderIds.join(',')})&order=record_date.asc`, { headers });
                 if (res.ok) historyData = await res.json();
             } catch (e) {
@@ -462,7 +453,6 @@
         const baseUrl = 'https://paiboon-creater.github.io/Data_Information_Jaguar_productions/daily_production.html';
         let allCardsHtml = [];
 
-        // วนลูปสร้างหน้าเอกสารตามลำดับที่เลือก
         selectedItems.forEach(item => {
             const orderId = item.orderId;
             const targetId = item.targetId;
@@ -478,7 +468,6 @@
             const targetObj = globalData.targets.find(t => String(t.id_target) === String(targetId));
             if (!targetObj) return;
 
-            // คำนวณลำดับขั้นตอนของใบสั่งนั้นๆ เพื่อสร้าง printCode
             const targetsForOrder = globalData.targets
                 .filter(t => String(t.id_work) === String(orderObj.id_work))
                 .sort((a,b) => parseInt(a.id_target) - parseInt(b.id_target));
@@ -500,7 +489,7 @@
             const currentUrl = `${baseUrl}?order_id=${encodeURIComponent(orderId)}&target_id=${encodeURIComponent(targetId)}`;
 
             const targetHistory = historyData.filter(h => String(h.id_target) === String(targetId));
-            const maxRowsPerPage = 22;
+            const maxRowsPerPage = 19; // ปรับเหลือ 19 บรรทัด
             const totalPages = Math.max(1, Math.ceil(targetHistory.length / maxRowsPerPage));
             
             let runningTotal = 0; 
@@ -561,6 +550,18 @@
                                     <span class="print-label">วันที่เริ่ม:</span> <span class="print-value" style="flex: 1;">${stepStartDateStr}</span>
                                     <span class="print-label" style="margin-left: 10px;">วันที่เสร็จ:</span> <span class="print-value" style="flex: 1;">${stepEndDateStr}</span>
                                 </div>
+                                
+                                <!-- เพิ่มบรรทัดว่าง 3 บรรทัด -->
+                                <div class="print-meta-row" style="margin-top: 6px;">
+                                    <span class="print-value" style="flex: 1; min-height: 16px;">&nbsp;</span>
+                                </div>
+                                <div class="print-meta-row" style="margin-top: 4px;">
+                                    <span class="print-value" style="flex: 1; min-height: 16px;">&nbsp;</span>
+                                </div>
+                                <div class="print-meta-row" style="margin-top: 4px; margin-bottom: 6px;">
+                                    <span class="print-value" style="flex: 1; min-height: 16px;">&nbsp;</span>
+                                </div>
+
                             </div>
                             <div class="print-qr-box">
                                 <div class="qrcode-target" data-url="${currentUrl}"></div>
